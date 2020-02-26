@@ -1,5 +1,7 @@
 class local2json{
-    // create By: Magdiel López Morales <lpzcode.net>
+    /*  create By: Magdiel López Morales <lpzcode.net>
+        versión: 1.0.0
+    */
     constructor(name){
         this.name   = name;
         this.tables = [];
@@ -65,26 +67,6 @@ class local2json{
         const val1     = searchParameter.split(' ',10)[0];
         const val2     = searchParameter.split(' ',10)[2];
         const question = searchParameter.split(' ',10)[1];
-        switch (question) {
-            case '==':
-                operation = 0;
-                break;
-            case '<':
-                operation = 1;
-                break;
-            case '<=':
-                operation = 2;
-                break;
-            case '>':
-                operation = 0;
-                break;
-            case '>=':
-                operation = 1;
-                break;
-            case '!=':
-                operation = 2;
-                break;
-        }
         for (const table in this.tables) {
             if (table.name == tableName) {
                 let data = table.data;
@@ -142,5 +124,141 @@ class local2json{
             break;
         }
         return result;
+    }
+    DeleteItem(tableName,searchParameter){
+        const val1     = searchParameter.split(' ',10)[0];
+        const val2     = searchParameter.split(' ',10)[2];
+        const question = searchParameter.split(' ',10)[1];
+        for (let table=0;table < this.tables.length;table++) {
+            if (this.tables[table].name == tableName) {
+                let data = this.tables[table].data;
+                let dataSize = data.length;
+                for(let i=0;i<dataSize;i++){
+                    let string = JSON.stringify(data[i]);
+                    string = string.replace('{','');
+                    string = string.replace('}','');
+                    string = string.replace('"','');
+                    let cad = string.split(',',5000);
+                    for (let key=0;key < cad.length;key++) {
+                        if(val1 == key.split(':')[0]){
+                            switch (question) {
+                                case '==':
+                                    if(val2 == key.split(':')[1]){
+                                        this.tables.data.splice(table,1);
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '<':
+                                    if(val2 < key.split(':')[1]){
+                                        this.tables.data.splice(table,1);
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '<=':
+                                    if(val2 <= key.split(':')[1]){
+                                        this.tables.data.splice(table,1);
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '>':
+                                    if(val2 > key.split(':')[1]){
+                                        this.tables.data.splice(table,1);
+                                        kthis.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '>=':
+                                    if(val2 >= key.split(':')[1]){
+                                        this.tables.data.splice(table,1);
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '!=':
+                                    if(val2 != key.split(':')[1]){
+                                        this.tables.data.splice(table,1);
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        return false;
+    }
+    UpdateItem(tableName,searchParameter,itemValue){
+        const val1     = searchParameter.split(' ',10)[0];
+        const val2     = searchParameter.split(' ',10)[2];
+        const question = searchParameter.split(' ',10)[1];
+        for (let table=0;table < this.tables.length;table++) {
+            if (this.tables[table].name == tableName) {
+                let data = this.tables[table].data;
+                let dataSize = data.length;
+                for(let i=0;i<dataSize;i++){
+                    let string = JSON.stringify(data[i]);
+                    string = string.replace('{','');
+                    string = string.replace('}','');
+                    string = string.replace('"','');
+                    let cad = string.split(',',5000);
+                    for (let key=0;key < cad.length;key++) {
+                        if(val1 == key.split(':')[0]){
+                            switch (question) {
+                                case '==':
+                                    if(val2 == key.split(':')[1]){
+                                        this.tables.data[table] = itemValue;
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '<':
+                                    if(val2 < key.split(':')[1]){
+                                        this.tables.data[table] = itemValue;
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '<=':
+                                    if(val2 <= key.split(':')[1]){
+                                        this.tables.data[table] = itemValue;
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '>':
+                                    if(val2 > key.split(':')[1]){
+                                        this.tables.data[table] = itemValue;
+                                        kthis.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '>=':
+                                    if(val2 >= key.split(':')[1]){
+                                        this.tables.data[table] = itemValue;
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                                case '!=':
+                                    if(val2 != key.split(':')[1]){
+                                        this.tables.data[table] = itemValue;
+                                        this.Save();
+                                        return true;
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        return false;
     }
 }
