@@ -20,9 +20,10 @@ class local2json{
     }
     GetTable(tableName){
         let tableOut = [];
-        for (const table in this.tables) {
-            if (table.name == tableName) {
-                tableOut = table;
+        const tableRegisters = this.tables.length;
+        for (let i=0;i<tableRegisters;i++) {
+            if (this.tables[i].name == tableName) {
+                tableOut = this.tables[i].data;
                 break;
             }
         }
@@ -62,137 +63,137 @@ class local2json{
         }
         return false;
     }
+    ClearObject(obj){
+        let obj_str = JSON.stringify(obj);
+        let out = "";
+        obj_str = obj_str.replace('{', '');
+        obj_str = obj_str.replace('}', '');
+        Array.from(obj_str).map(t=>{
+            if(t!='"' && t!='\\'){
+                out += t;
+            }
+        });
+        return out;
+    }
     GetItem(tableName,searchParameter){
-        let result     = [];
-        const val1     = searchParameter.split(' ',10)[0];
-        const val2     = searchParameter.split(' ',10)[2];
-        const question = searchParameter.split(' ',10)[1];
-        for (const table in this.tables) {
-            if (table.name == tableName) {
-                let data = table.data;
-                let dataSize = data.length;
-                for(let i=0;i<dataSize;i++){
-                    let string = JSON.stringify(data[i]);
-                    string = string.replace('{','');
-                    string = string.replace('}','');
-                    string = string.replace('"','');
-                    let cad = string.split(',',5000);
-                    for (let key=0;key < cad.length;key++) {
-                        if(val1 == key.split(':')[0]){
-                            switch (question) {
-                                case '==':
-                                    if(val2 == key.split(':')[1]){
-                                        result.push(data[i]);
-                                        key = cad.length;
-                                    }
-                                    break;
-                                case '<':
-                                    if(val2 < key.split(':')[1]){
-                                        result.push(data[i]);
-                                        key = cad.length;
-                                    }
-                                    break;
-                                case '<=':
-                                    if(val2 <= key.split(':')[1]){
-                                        result.push(data[i]);
-                                        key = cad.length;
-                                    }
-                                    break;
-                                case '>':
-                                    if(val2 > key.split(':')[1]){
-                                        result.push(data[i]);
-                                        key = cad.length;
-                                    }
-                                    break;
-                                case '>=':
-                                    if(val2 >= key.split(':')[1]){
-                                        result.push(data[i]);
-                                        key = cad.length;
-                                    }
-                                    break;
-                                case '!=':
-                                    if(val2 != key.split(':')[1]){
-                                        result.push(data[i]);
-                                        key = cad.length;
-                                    }
-                                    break;
+        const tablesSelected = this.GetTable(tableName);
+        const tableRegisters = tablesSelected.length;
+        let result           = [];
+        const val1           = searchParameter.split(' ',10)[0];
+        const val2           = searchParameter.split(' ',10)[2];
+        const question       = searchParameter.split(' ',10)[1];
+        for(let i=0;i<tableRegisters;i++){
+            const tableString = this.ClearObject(tablesSelected[i]);
+            const parameters = tableString.split(',',500);
+            for(let x=0;x<parameters.length;x++){
+                if(parameters[x].split(':')[0] == val1){
+                    const value = parameters[x].split(':')[1];
+                    switch (question) {
+                        case '==':
+                            if(val2 == value){
+                                result.push(tablesSelected[i]);
+                                x = parameters.length;
                             }
-                        }
+                            break;
+                        case '<':
+                            if(val2 < value){
+                                result.push(tablesSelected[i]);
+                                x = parameters.length;
+                            }
+                            break;
+                        case '<=':
+                            if(val2 <= value){
+                                result.push(tablesSelected[i]);
+                                x = parameters.length;
+                            }
+                            break;
+                        case '>':
+                            if(val2 > value){
+                                result.push(tablesSelected[i]);
+                                x = parameters.length;
+                            }
+                            break;
+                        case '>=':
+                            if(val2 >= value){
+                                result.push(tablesSelected[i]);
+                                x = parameters.length;
+                            }
+                            break;
+                        case '!=':
+                            if(val2 != value){
+                                result.push(tablesSelected[i]);
+                                x = parameters.length;
+                            }
+                            break;
                     }
                 }
             }
-            break;
         }
         return result;
     }
     DeleteItem(tableName,searchParameter){
-        const val1     = searchParameter.split(' ',10)[0];
-        const val2     = searchParameter.split(' ',10)[2];
-        const question = searchParameter.split(' ',10)[1];
-        for (let table=0;table < this.tables.length;table++) {
-            if (this.tables[table].name == tableName) {
-                let data = this.tables[table].data;
-                let dataSize = data.length;
-                for(let i=0;i<dataSize;i++){
-                    let string = JSON.stringify(data[i]);
-                    string = string.replace('{','');
-                    string = string.replace('}','');
-                    string = string.replace('"','');
-                    let cad = string.split(',',5000);
-                    for (let key=0;key < cad.length;key++) {
-                        if(val1 == key.split(':')[0]){
-                            switch (question) {
-                                case '==':
-                                    if(val2 == key.split(':')[1]){
-                                        this.tables.data.splice(table,1);
-                                        this.Save();
-                                        return true;
-                                    }
-                                    break;
-                                case '<':
-                                    if(val2 < key.split(':')[1]){
-                                        this.tables.data.splice(table,1);
-                                        this.Save();
-                                        return true;
-                                    }
-                                    break;
-                                case '<=':
-                                    if(val2 <= key.split(':')[1]){
-                                        this.tables.data.splice(table,1);
-                                        this.Save();
-                                        return true;
-                                    }
-                                    break;
-                                case '>':
-                                    if(val2 > key.split(':')[1]){
-                                        this.tables.data.splice(table,1);
-                                        kthis.Save();
-                                        return true;
-                                    }
-                                    break;
-                                case '>=':
-                                    if(val2 >= key.split(':')[1]){
-                                        this.tables.data.splice(table,1);
-                                        this.Save();
-                                        return true;
-                                    }
-                                    break;
-                                case '!=':
-                                    if(val2 != key.split(':')[1]){
-                                        this.tables.data.splice(table,1);
-                                        this.Save();
-                                        return true;
-                                    }
-                                    break;
+        const tablesSelected = this.GetTable(tableName);
+        const tableRegisters = tablesSelected.length;
+        let result           = false;
+        const val1           = searchParameter.split(' ',10)[0];
+        const val2           = searchParameter.split(' ',10)[2];
+        const question       = searchParameter.split(' ',10)[1];
+        for(let i=0;i<tableRegisters;i++){
+            const tableString = this.ClearObject(tablesSelected[i]);
+            const parameters = tableString.split(',',500);
+            for(let x=0;x<parameters.length;x++){
+                if(parameters[x].split(':')[0] == val1){
+                    const value = parameters[x].split(':')[1];
+                    switch (question) {
+                        case '==':
+                            if(val2 == value){
+                                this.tables.data.splice(tablesSelected[i],1);
+                                this.Save();
+                                return true;
                             }
-                        }
+                            break;
+                        case '<':
+                            if(val2 < value){
+                                this.tables.data.splice(tablesSelected[i],1);
+                                this.Save();
+                                return true;
+                            }
+                            break;
+                        case '<=':
+                            if(val2 <= value){
+                                this.tables.data.splice(tablesSelected[i],1);
+                                this.Save();
+                                return true;
+                            }
+                            break;
+                        case '>':
+                            if(val2 > value){
+                                this.tables.data.splice(tablesSelected[i],1);
+                                this.Save();
+                                return true;
+                            }
+                            break;
+                        case '>=':
+                            if(val2 >= value){
+                                this.tables.data.splice(tablesSelected[i],1);
+                                this.Save();
+                                return true;
+                            }
+                            break;
+                        case '!=':
+                            if(val2 != value){
+                                this.tables.data.splice(tablesSelected[i],1);
+                                this.Save();
+                                return true;
+                            }
+                            break;
                     }
                 }
             }
-            break;
         }
-        return false;
+        return result;
     }
+    
     UpdateItem(tableName,searchParameter,itemValue){
         const val1     = searchParameter.split(' ',10)[0];
         const val2     = searchParameter.split(' ',10)[2];

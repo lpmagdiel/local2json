@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>local5json</title>
+</head>
+<body>
+    <div id="lista"></div>
+    <script src="../local2json.js"></script>
+    <script>
+        var lista = document.getElementById('lista');
+        var DB = new local2json('tienda');
+        var clientes = DB.GetTable('cliente');
+        if(clientes.length < 1){
+            DB.NewTable('cliente');
+            DB.InsertItem('cliente',{name:'Juan',sexo:'hombre'});
+            DB.InsertItem('cliente',{name:'Maria',sexo:'mujer'});
+            DB.InsertItem('cliente',{name:'Fernando',sexo:'hombre'});
+        }
+        clientes = DB.GetItem('cliente','sexo == mujer');
+        for(let i=0;i<clientes.length;i++){
+            let p = document.createElement('p');
+            p.innerText = clientes[i].name;
+            lista.append(p);
+        }
+    </script>
+</body>
+</html>
