@@ -1,5 +1,4 @@
 # local2json
-descargar aqui: [comprimido](#)
 
 ## listado de funciones:
 
@@ -127,3 +126,6 @@ actualiza los elementos que encajen con los parámetros de búsqueda
       
     
     const  blackAnimals  =  DB.GetItem('animal','color == black');
+    
+    
+
