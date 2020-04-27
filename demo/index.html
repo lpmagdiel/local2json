@@ -18,6 +18,8 @@
             DB.InsertItem('cliente',{name:'Maria',sexo:'mujer'});
             DB.InsertItem('cliente',{name:'Fernando',sexo:'hombre'});
         }
+        DB.DeleteItem('cliente','name == Juan');
+        DB.UpdateItem('cliente','name == Fernando',{name:'Fernanda',sexo:'mujer'});
         clientes = DB.GetItem('cliente','sexo == mujer');
         for(let i=0;i<clientes.length;i++){
             let p = document.createElement('p');
