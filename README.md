@@ -45,7 +45,7 @@ crea fácilmente una nueva tabla
     storage.NewTable('user');
 
 ### GetTable
-obtiene un array con todos los registros de la tabla especificada
+obtiene un objeto que contiene 2 atributos (index,items) items contiene un array con todos los registros de la tabla especificada
 
     const storage = new local2json('mydatabase);
     const users = storage.GetTable('user');

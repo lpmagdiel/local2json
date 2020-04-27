@@ -197,7 +197,6 @@ class local2json{
         }
         return result;
     }
-    
     UpdateItem(tableName,searchParameter,newValue){
         const tablesSelected = this.GetTable(tableName);
         const tableRegisters = tablesSelected.items.length;
