@@ -1,6 +1,6 @@
 class local2json{
     /*  create By: Magdiel López Morales <lpzcode.net>
-        versión: 1.1.0
+        versión: 1.1.2
     */
     constructor(name){
         this.name   = name;
@@ -14,6 +14,10 @@ class local2json{
         localStorage.setItem(this.name,JSON.stringify(this.tables));
     }
     NewTable(tableName){
+        const tableRegisters = this.tables.length;
+        for (let i=0;i<tableRegisters;i++){
+            if(this.tables[i].name == tableName) return false;
+        }
         this.tables.push({name:tableName,data:[],index:this.tables.length});
         this.Save();
         return true;
