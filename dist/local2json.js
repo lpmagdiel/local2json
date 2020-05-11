@@ -1,6 +1,6 @@
 class local2json{
-    /*  create By: Magdiel López Morales <lpzcode.net>
-        versión: 1.1.2
+    /*  create By: Magdiel López Morales <lpmagdiel>
+        versión: 1.1.3
     */
     constructor(name){
         this.name   = name;
@@ -83,6 +83,30 @@ class local2json{
         });
         return out;
     }
+    IsValidQuestion(question,val1,val2){
+        let valid = false;
+        switch(question){
+            case '==':
+                valid = (val1 == val2);
+                break;
+            case '<':
+                valid = (val1 < val2);
+                break;
+            case '<=':
+                valid = (val1 <= val2);
+                break;
+            case '>':
+                valid = (val1 > val2);
+                break;
+            case '>=':
+                valid = (val1 >= val2);
+                break;
+            case '!=':
+                valid = (val1 != val2);
+                break;
+        }
+        return valid;
+    }
     GetItem(tableName,searchParameter){
         const tablesSelected = this.GetTable(tableName);
         const tableRegisters = tablesSelected.items.length;
@@ -92,47 +116,13 @@ class local2json{
         const question       = searchParameter.split(' ',10)[1];
         for(let i=0;i<tableRegisters;i++){
             const tableString = this.ClearObject(tablesSelected.items[i]);
-            const parameters = tableString.split(',',500);
+            const parameters  = tableString.split(',',500);
             for(let x=0;x<parameters.length;x++){
                 if(parameters[x].split(':')[0] == val1){
                     const value = parameters[x].split(':')[1];
-                    switch (question) {
-                        case '==':
-                            if(val2 == value){
-                                result.push(tablesSelected.items[i]);
-                                x = parameters.length;
-                            }
-                            break;
-                        case '<':
-                            if(val2 < value){
-                                result.push(tablesSelected.items[i]);
-                                x = parameters.length;
-                            }
-                            break;
-                        case '<=':
-                            if(val2 <= value){
-                                result.push(tablesSelected.items[i]);
-                                x = parameters.length;
-                            }
-                            break;
-                        case '>':
-                            if(val2 > value){
-                                result.push(tablesSelected.items[i]);
-                                x = parameters.length;
-                            }
-                            break;
-                        case '>=':
-                            if(val2 >= value){
-                                result.push(tablesSelected.items[i]);
-                                x = parameters.length;
-                            }
-                            break;
-                        case '!=':
-                            if(val2 != value){
-                                result.push(tablesSelected.items[i]);
-                                x = parameters.length;
-                            }
-                            break;
+                    if(this.IsValidQuestion(question,val2,value)){
+                        result.push(tablesSelected.items[i]);
+                        x = parameters.length;
                     }
                 }
             }
@@ -148,53 +138,14 @@ class local2json{
         const question       = searchParameter.split(' ',10)[1];
         for(let i=0;i<tableRegisters;i++){
             const tableString = this.ClearObject(tablesSelected.items[i]);
-            const parameters = tableString.split(',',500);
+            const parameters  = tableString.split(',',500);
             for(let x=0;x<parameters.length;x++){
                 if(parameters[x].split(':')[0] == val1){
                     const value = parameters[x].split(':')[1];
-                    switch (question) {
-                        case '==':
-                            if(val2 == value){
-                                this.tables[tablesSelected.index].data.splice(tablesSelected[i],1);
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '<':
-                            if(val2 < value){
-                                this.tables[tablesSelected.index].data.splice(tablesSelected[i],1);
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '<=':
-                            if(val2 <= value){
-                                this.tables[tablesSelected.index].data.splice(tablesSelected[i],1);
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '>':
-                            if(val2 > value){
-                                this.tables[tablesSelected.index].data.splice(tablesSelected[i],1);
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '>=':
-                            if(val2 >= value){
-                                this.tables[tablesSelected.index].data.splice(tablesSelected[i],1);
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '!=':
-                            if(val2 != value){
-                                this.tables[tablesSelected.index].data.splice(tablesSelected[i],1);
-                                this.Save();
-                                return true;
-                            }
-                            break;
+                    if(this.IsValidQuestion(question,val2,value)){
+                        this.tables[tablesSelected.index].data.splice(tablesSelected[i],1);
+                        this.Save();
+                        return true;
                     }
                 }
             }
@@ -210,53 +161,14 @@ class local2json{
         const question       = searchParameter.split(' ',10)[1];
         for(let i=0;i<tableRegisters;i++){
             const tableString = this.ClearObject(tablesSelected.items[i]);
-            const parameters = tableString.split(',',500);
+            const parameters  = tableString.split(',',500);
             for(let x=0;x<parameters.length;x++){
                 if(parameters[x].split(':')[0] == val1){
                     const value = parameters[x].split(':')[1];
-                    switch (question) {
-                        case '==':
-                            if(val2 == value){
-                                this.tables[tablesSelected.index].data[i] = newValue;
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '<':
-                            if(val2 < value){
-                                this.tables[tablesSelected.index].data[i] = newValue;
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '<=':
-                            if(val2 <= value){
-                                this.tables[tablesSelected.index].data[i] = newValue;
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '>':
-                            if(val2 > value){
-                                this.tables[tablesSelected.index].data[i] = newValue;
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '>=':
-                            if(val2 >= value){
-                                this.tables[tablesSelected.index].data[i] = newValue;
-                                this.Save();
-                                return true;
-                            }
-                            break;
-                        case '!=':
-                            if(val2 != value){
-                                this.tables[tablesSelected.index].data[i] = newValue;
-                                this.Save();
-                                return true;
-                            }
-                            break;
+                    if(this.IsValidQuestion(question,val2,value)){
+                        this.tables[tablesSelected.index].data[i] = newValue;
+                        this.Save();
+                        return true;
                     }
                 }
             }

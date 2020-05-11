@@ -1,4 +1,4 @@
-# local2json v1.1.0
+# local2json v1.1.3
 
 ## listado de funciones:
 
