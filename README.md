@@ -31,11 +31,13 @@ código javascript
 |nombre| simbolo |
 |--|--|
 | igualdad | == |
+| igualdad | === |
 | menor que | < |
-| menor o igual|<=|
-|mayor que|>|
-|mayor o igual| >=|
+| menor o igual|<= |
+|mayor que| >|
+|mayor o igual| >= |
 |diferente que| !=|
+|contiene | %% |
 
 ### NewTable
 crea fácilmente una nueva tabla
@@ -111,7 +113,7 @@ actualiza los elementos que encajen con los parámetros de búsqueda
     const parameter = 'age != 15';
     storage.UpdateItem('user',parameter);
 
-## ejemplo completo
+## ejemplo completo 1
 
     const  DB  =  new  local2json('farm');
     
@@ -129,3 +131,18 @@ actualiza los elementos que encajen con los parámetros de búsqueda
     
     
 
+## ejemplo completo 2
+    const DB = new local2json('shop');
+    
+    DB.NewTable('client');
+    
+      
+    
+    DB.InsertItem('client',{name:'Jose López',sex:'M',age:23});
+    DB.InsertItem('client',{name:'Tamara Gonzales',sex:'F',age:37});
+    DB.InsertItem('client',{name:'Hilda Bayres',sex:'F',age:21});
+    
+      
+    // obtendra una lista de todos los clientes que contengan la palabra Bayres
+    const lastName = DB.GetItem('client','name %% Bayres');
+    console.log(lastName);

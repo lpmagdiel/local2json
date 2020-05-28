@@ -1,6 +1,6 @@
 class local2json{
     /*  create By: Magdiel López Morales <lpmagdiel>
-        versión: 1.1.3
+        versión: 1.1.4
     */
     constructor(name){
         this.name   = name;
@@ -89,6 +89,9 @@ class local2json{
             case '==':
                 valid = (val1 == val2);
                 break;
+            case '===':
+                valid = (val1 === val2);
+                break;
             case '<':
                 valid = (val1 < val2);
                 break;
@@ -103,6 +106,9 @@ class local2json{
                 break;
             case '!=':
                 valid = (val1 != val2);
+                break;
+            case '%%':
+                valid = (val2.indexOf(val1) > -1);
                 break;
         }
         return valid;
