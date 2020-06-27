@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>local2json</title>
+</head>
+<body>
+    <div id="lista"></div>
+    <script src="../dist/local2json.js"></script>
+    <script>
+        var lista = document.getElementById('lista');
+        var DB = new local2json('tienda');
+        if(!DB.existTable('cliente')){
+            DB.createTable('cliente');
+            DB.insert('cliente',{name:'Juan',sexo:'hombre'});
+            DB.insert('cliente',{name:'Maria',sexo:'mujer'});
+            DB.insert('cliente',{name:'Fernando',sexo:'hombre'});
+        }
+        DB.trigger('cliente','update',obj=>{
+            console.log('Se actualizo un elemento en la tabla cliente 💥');
+        });
+
+        DB.delete('cliente','name == Juan');
+        DB.update('cliente','name == Fernando',{name:'Fernanda',sexo:'mujer'});
+        clientes = DB.get('cliente','sexo == mujer');
+        for(let i=0;i<clientes.length;i++){
+            let p = document.createElement('p');
+            p.innerText = clientes[i].name;
+            lista.append(p);
+        }
+    </script>
+</body>
+</html>

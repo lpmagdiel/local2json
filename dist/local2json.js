@@ -1,10 +1,11 @@
 class local2json{
     /*  create By: Magdiel López Morales <lpmagdiel>
-        versión: 1.1.4
+        versión: 1.1.5
     */
     constructor(name){
         this.name   = name;
         this.tables = [];
+        this.triggers = [];
         if(localStorage.getItem(name)){
             this.tables = JSON.parse(localStorage.getItem(name));
         }
@@ -13,7 +14,7 @@ class local2json{
     Save(){
         localStorage.setItem(this.name,JSON.stringify(this.tables));
     }
-    NewTable(tableName){
+    createTable(tableName){
         const tableRegisters = this.tables.length;
         for (let i=0;i<tableRegisters;i++){
             if(this.tables[i].name == tableName) return false;
@@ -22,7 +23,7 @@ class local2json{
         this.Save();
         return true;
     }
-    GetTable(tableName){
+    getTable(tableName){
         let tableOut ={
             items:[],
             index:0
@@ -37,7 +38,18 @@ class local2json{
         }
         return tableOut;
     }
-    UpdateTable(tableName,data){
+    existTable(tableName){
+        let out = false;
+        const tableRegisters = this.tables.length;
+        for (let i=0;i<tableRegisters;i++) {
+            if (this.tables[i].name == tableName) {
+                out = true;
+                break;
+            }
+        }
+        return out;
+    }
+    updateTable(tableName,data){
         const tableRegisters = this.tables.length;
         for (let i=0;i < tableRegisters;i++) {
             if (this.tables[i].name == tableName) {
@@ -48,7 +60,7 @@ class local2json{
         }
         return false;
     }
-    DeteleTable(tableName){
+    deleteTable(tableName){
         const tableRegisters = this.tables.length;
         for (let i=0;i < tableRegisters;i++) {
             if (this.tables[i].name == tableName) {
@@ -60,12 +72,17 @@ class local2json{
         return false;
     }
     // items control functions
-    InsertItem(tableName,item){
+    insert(tableName,item){
         const tableRegisters = this.tables.length;
         for (let i=0;i < tableRegisters;i++) {
             if (this.tables[i].name == tableName) {
                 this.tables[i].data.push(item);
                 this.Save();
+                for(let t in this.triggers){
+                    if(this.triggers[t].table == tableName && this.triggers[t].event == 'insert'){
+                        this.triggers[t].fun();
+                    }
+                }
                 return true;
             }
         }
@@ -113,8 +130,8 @@ class local2json{
         }
         return valid;
     }
-    GetItem(tableName,searchParameter){
-        const tablesSelected = this.GetTable(tableName);
+    get(tableName,searchParameter){
+        const tablesSelected = this.getTable(tableName);
         const tableRegisters = tablesSelected.items.length;
         let result           = [];
         const val1           = searchParameter.split(' ',10)[0];
@@ -135,8 +152,8 @@ class local2json{
         }
         return result;
     }
-    DeleteItem(tableName,searchParameter){
-        const tablesSelected = this.GetTable(tableName);
+    delete(tableName,searchParameter){
+        const tablesSelected = this.getTable(tableName);
         const tableRegisters = tablesSelected.items.length;
         let result           = false;
         const val1           = searchParameter.split(' ',10)[0];
@@ -149,8 +166,14 @@ class local2json{
                 if(parameters[x].split(':')[0] == val1){
                     const value = parameters[x].split(':')[1];
                     if(this.IsValidQuestion(question,val2,value)){
+                        let oldData = this.tables[tablesSelected.index].data[i];
                         this.tables[tablesSelected.index].data.splice(tablesSelected[i],1);
                         this.Save();
+                        for(let t in this.triggers){
+                            if(this.triggers[t].table == tableName && this.triggers[t].event == 'delete'){
+                                this.triggers[t].fun();
+                            }
+                        }
                         return true;
                     }
                 }
@@ -158,8 +181,8 @@ class local2json{
         }
         return result;
     }
-    UpdateItem(tableName,searchParameter,newValue){
-        const tablesSelected = this.GetTable(tableName);
+    update(tableName,searchParameter,newValue){
+        const tablesSelected = this.getTable(tableName);
         const tableRegisters = tablesSelected.items.length;
         let result           = false;
         const val1           = searchParameter.split(' ',10)[0];
@@ -174,11 +197,19 @@ class local2json{
                     if(this.IsValidQuestion(question,val2,value)){
                         this.tables[tablesSelected.index].data[i] = newValue;
                         this.Save();
+                        for(let t in this.triggers){
+                            if(this.triggers[t].table == tableName && this.triggers[t].event == 'update'){
+                                this.triggers[t].fun();
+                            }
+                        }
                         return true;
                     }
                 }
             }
         }
         return result;
+    }
+    trigger(tableName,event,fx){
+        this.triggers.push({table:tableName,event:event,fun:fx});
     }
 }
