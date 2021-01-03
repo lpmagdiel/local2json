@@ -11,16 +11,16 @@
     <script>
         var lista = document.getElementById('lista');
         var DB = new local2json('tienda');
-        var clientes = DB.GetTable('cliente');
+        var clientes = DB.GetCollection('cliente');
         if(clientes.length < 1){
-            DB.NewTable('cliente');
-            DB.InsertItem('cliente',{name:'Juan',sexo:'hombre'});
-            DB.InsertItem('cliente',{name:'Maria',sexo:'mujer'});
-            DB.InsertItem('cliente',{name:'Fernando',sexo:'hombre'});
+            DB.CreateCollection('cliente');
+            DB.Insert('cliente',{name:'Juan',sexo:'hombre'});
+            DB.Insert('cliente',{name:'Maria',sexo:'mujer'});
+            DB.Insert('cliente',{name:'Fernando',sexo:'hombre'});
         }
-        DB.DeleteItem('cliente','name == Juan');
-        DB.UpdateItem('cliente','name == Fernando',{name:'Fernanda',sexo:'mujer'});
-        clientes = DB.GetItem('cliente','sexo == mujer');
+        DB.Delete('cliente','name == Juan');
+        DB.Update('cliente','name == Fernando',{name:'Fernanda',sexo:'mujer'});
+        clientes = DB.Get('cliente','sexo == mujer');
         for(let i=0;i<clientes.length;i++){
             let p = document.createElement('p');
             p.innerText = clientes[i].name;

@@ -1,5 +1,33 @@
-class local2json{
-    /*  create By: Magdiel López Morales <lpmagdiel>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: local2json.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: local2json.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>class local2json{
+    /*  create By: Magdiel López Morales &lt;lpmagdiel>
         versión: 1.2.0
     */
 
@@ -27,7 +55,7 @@ class local2json{
      */
     CreateCollection(Collection){
         const CountCollection = this.collections.length;
-        for (let i=0;i<CountCollection;i++){
+        for (let i=0;i&lt;CountCollection;i++){
             if(this.collections[i].name == Collection) return false;
         }
         this.collections.push({name:Collection,data:[],index:this.collections.length});
@@ -45,7 +73,7 @@ class local2json{
             index:0
         };
         const CountCollection = this.collections.length;
-        for (let i=0;i<CountCollection;i++) {
+        for (let i=0;i&lt;CountCollection;i++) {
             if (this.collections[i].name == Collection) {
                 CollectionOut.items = this.collections[i].data;
                 CollectionOut.index = i;
@@ -62,7 +90,7 @@ class local2json{
     ThisCollectionExist(Collection){
         let out = false;
         const CountCollection = this.collections.length;
-        for (let i=0;i<CountCollection;i++) {
+        for (let i=0;i&lt;CountCollection;i++) {
             if (this.collections[i].name == Collection) {
                 out = true;
                 break;
@@ -78,7 +106,7 @@ class local2json{
      */
     UpdateCollection(Collection,data=[]){
         const CountCollection = this.collections.length;
-        for (let i=0;i < CountCollection;i++) {
+        for (let i=0;i &lt; CountCollection;i++) {
             if (this.collections[i].name == Collection) {
                 this.collections[i].data = data;
                 this.Save();
@@ -94,7 +122,7 @@ class local2json{
      */
     DeleteCollection(Collection){
         const CountCollection = this.collections.length;
-        for (let i=0;i < CountCollection;i++) {
+        for (let i=0;i &lt; CountCollection;i++) {
             if (this.collections[i].name == Collection) {
                 this.collections.splice(i, 1);
                 this.Save();
@@ -113,12 +141,12 @@ class local2json{
      */
     Insert(Collection,item){
         const CountCollection = this.collections.length;
-        for (let i=0;i < CountCollection;i++) {
+        for (let i=0;i &lt; CountCollection;i++) {
             if (this.collections[i].name == Collection) {
                 this.collections[i].data.push(item);
                 this.Save();
                 for(let t in this.triggers){
-                    if(this.triggers[t].table == Collection && this.triggers[t].event == 'insert'){
+                    if(this.triggers[t].table == Collection &amp;&amp; this.triggers[t].event == 'insert'){
                         this.triggers[t].fun();
                     }
                 }
@@ -133,7 +161,7 @@ class local2json{
         obj_str = obj_str.replace('{', '');
         obj_str = obj_str.replace('}', '');
         Array.from(obj_str).map(t=>{
-            if(t!='"' && t!='\\'){
+            if(t!='"' &amp;&amp; t!='\\'){
                 out += t;
             }
         });
@@ -148,11 +176,11 @@ class local2json{
             case '===':
                 valid = (val1 === val2);
                 break;
-            case '<':
-                valid = (val1 < val2);
+            case '&lt;':
+                valid = (val1 &lt; val2);
                 break;
-            case '<=':
-                valid = (val1 <= val2);
+            case '&lt;=':
+                valid = (val1 &lt;= val2);
                 break;
             case '>':
                 valid = (val1 > val2);
@@ -182,10 +210,10 @@ class local2json{
         const val1           = searchParameter.split(' ',10)[0];
         const val2           = searchParameter.split(' ',10)[2];
         const question       = searchParameter.split(' ',10)[1];
-        for(let i=0;i<CountCollection;i++){
+        for(let i=0;i&lt;CountCollection;i++){
             const CollectionString = this.ClearObject(SelectedCollection.items[i]);
             const parameters  = CollectionString.split(',',500);
-            for(let x=0;x<parameters.length;x++){
+            for(let x=0;x&lt;parameters.length;x++){
                 if(parameters[x].split(':')[0] == val1){
                     const value = parameters[x].split(':')[1];
                     if(this.IsValidQuestion(question,val2,value)){
@@ -210,17 +238,17 @@ class local2json{
         const val1           = searchParameter.split(' ',10)[0];
         const val2           = searchParameter.split(' ',10)[2];
         const question       = searchParameter.split(' ',10)[1];
-        for(let i=0;i<CountCollection;i++){
+        for(let i=0;i&lt;CountCollection;i++){
             const CollectionString = this.ClearObject(SelectedCollection.items[i]);
             const parameters  = CollectionString.split(',',500);
-            for(let x=0;x<parameters.length;x++){
+            for(let x=0;x&lt;parameters.length;x++){
                 if(parameters[x].split(':')[0] == val1){
                     const value = parameters[x].split(':')[1];
                     if(this.IsValidQuestion(question,val2,value)){
                         this.collections[SelectedCollection.index].data.splice(SelectedCollection[i],1);
                         this.Save();
                         for(let t in this.triggers){
-                            if(this.triggers[t].table == Collection && this.triggers[t].event == 'delete'){
+                            if(this.triggers[t].table == Collection &amp;&amp; this.triggers[t].event == 'delete'){
                                 this.triggers[t].fun();
                             }
                         }
@@ -245,17 +273,17 @@ class local2json{
         const val1           = searchParameter.split(' ',10)[0];
         const val2           = searchParameter.split(' ',10)[2];
         const question       = searchParameter.split(' ',10)[1];
-        for(let i=0;i<CountCollection;i++){
+        for(let i=0;i&lt;CountCollection;i++){
             const CollectionString = this.ClearObject(SelectedCollection.items[i]);
             const parameters  = CollectionString.split(',',500);
-            for(let x=0;x<parameters.length;x++){
+            for(let x=0;x&lt;parameters.length;x++){
                 if(parameters[x].split(':')[0] == val1){
                     const value = parameters[x].split(':')[1];
                     if(this.IsValidQuestion(question,val2,value)){
                         this.collections[SelectedCollection.index].data[i] = newValue;
                         this.Save();
                         for(let t in this.triggers){
-                            if(this.triggers[t].table == Collection && this.triggers[t].event == 'update'){
+                            if(this.triggers[t].table == Collection &amp;&amp; this.triggers[t].event == 'update'){
                                 this.triggers[t].fun();
                             }
                         }
@@ -276,4 +304,26 @@ class local2json{
     Trigger(Collection,event,fx){
         this.triggers.push({table:Collection,event:event,fun:fx});
     }
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="local2json.html">local2json</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Jan 03 2021 22:25:37 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

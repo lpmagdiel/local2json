@@ -30,22 +30,22 @@
         const DB = new local2json('cards');
         const cardContainer = document.getElementById('card-container');
         const btnAdd = document.getElementById('btn-add');
-        if(!DB.existTable('card')){
-            DB.createTable('card');
+        if(!DB.ThisCollectionExist('card')){
+            DB.CreateCollection('card');
         }
         btnAdd.addEventListener('click',e=>{
             let id = prompt('Ingrese el id:');
             let title = prompt('Ingrese el titulo');
             let description = prompt('Ingrese el contenido');
             createCard(id,title,description);
-            DB.insert('card',{id:id,title:title,description:description});
+            DB.Insert('card',{id:id,title:title,description:description});
         });
         function createCard(id,title,description){
             let cardBox = document.createElement('div');
             cardBox.className += 'card';
             cardBox.innerHTML = `<h2>${title}</h2><p>${description}</p>`;
             cardBox.addEventListener('click',e=>{
-                DB.delete('card','id == '+id);
+                DB.Delete('card','id == '+id);
                 cardBox.style.display = 'none';
             });
             cardContainer.append(cardBox);
@@ -54,7 +54,7 @@
         
 
         // cargar tarjetas
-        const savedCards = DB.getTable('card');
+        const savedCards = DB.GetCollection('card');
         for(let i=0;i<savedCards.items.length;i++){
             const idCard = savedCards.items[i].id;
             const titleCard = savedCards.items[i].title;
