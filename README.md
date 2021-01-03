@@ -1,19 +1,20 @@
-# local2json v1.1.5
+# local2json v1.2.0
 
 ## listado de funciones:
 
- - createTable
- - getTable
- - updateTable
- - deleteTable
- - existTable
- - insert
- - get
- - delete
- - update
- - trigger
+ - CreateCollection
+ - GetCollection
+ - UpdateCollection
+ - DeleteCollection
+ - ThisCollectionExist
+ - Insert
+ - Get
+ - Delete
+ - Update
+ - Trigger
 
 ## como usar:
+
 ### inicializar
 html script ==>
 
@@ -41,32 +42,32 @@ código javascript
 |diferente que| !=|
 |contiene | %% |
 
-### createTable
-crea fácilmente una nueva tabla
+### CreateCollection
+crea fácilmente una nueva coleccion
 
     const storage = new local2json('mydatabase');
-    storage.createTable('user');
+    storage.CreateCollection('user');
 
-### existTable
+### ThisCollectionExist
 verifica que la tabla especificada exista en la base de datos, retorna verdadero o falso
 
     const storage = new local2json('mydatabase');
-    if(storage.existTable('user')){
-        console.log('la tabla [user] ya existe');
+    if(storage.ThisCollectionExist('user')){
+        console.log('la coneccion [user] ya existe');
     }
     else{
-        storage.createTable('user');
-        console.log('la tabla [user] no existía pero se creo');
+        storage.CreateCollection('user');
+        console.log('la coleccion [user] no existía pero se creo');
     }
 
-### getTable
-obtiene un objeto que contiene 2 atributos (index,items) items contiene un array con todos los registros de la tabla especificada
+### GetCollection
+obtiene un objeto que contiene 2 atributos (index,items) items contiene un array con todos los registros de la coleccion especificada
 
     const storage = new local2json('mydatabase');
-    const users = storage.getTable('user');
+    const users = storage.GetCollection('user');
 
-### updateTable
-actualiza todos los registros de la tabla especificada, cuidado su uso incorrecto puede hacer que se eliminen los registros
+### UpdateCollection
+actualiza todos los registros de la coleccion especificada, cuidado su uso incorrecto puede hacer que se eliminen los registros
 
     const storage = new local2json('mydatabase');
     const newUsers = [
@@ -86,16 +87,16 @@ actualiza todos los registros de la tabla especificada, cuidado su uso incorrect
 	    phone:654321
     }
     ];
-    storage.updateTable('user',newUsers);
+    storage.UpdateCollection('user',newUsers);
 
-### deleteTable
-elimina una tabla y todos los registros que contiene
+### DeleteCollection
+elimina una coleccion y todos los registros que contiene
 
     const storage = new local2json('mydatabase');
-    storage.deleteTable('user');
+    storage.DeleteCollection('user');
 
-### insert
-inserta un nuevo objeto en la tabla especificada
+### Insert
+inserta un nuevo objeto en la coleccion especificada
 
     const storage = new local2json('mydatabase');
     const person = {
@@ -103,35 +104,35 @@ inserta un nuevo objeto en la tabla especificada
 	    age:17,
 	    phone:890043
     }
-    storage.insert('user',person);
+    storage.Insert('user',person);
 
 
-### get
+### Get
 obtiene los elementos que encajen con los parámetros de búsqueda
 
     const storage = new local2json('mydatabase');
     const parameter = 'name == mark';
-    const items = storage.get('user',parameter);
+    const items = storage.Get('user',parameter);
     
-### delete
+### Delete
 elimina los elementos que encajen con los parámetros de búsqueda
 
 	const storage = new local2json('mydatabase');
     const parameter = 'age >= 17';
-    storage.delete('user',parameter);
+    storage.Delete('user',parameter);
 
-### update
+### Update
 actualiza los elementos que encajen con los parámetros de búsqueda
 
 	const storage = new local2json('mydatabase');
     const parameter = 'age != 15';
-    storage.update('user',parameter);
+    storage.Update('user',parameter);
 
-## trigger
-permite ejecutar una funcion despues que se realice un cambio en un elemento de la tabla especificada: insertar, eliminar o actualizar.
+## Trigger
+permite ejecutar una funcion despues que se realice un cambio en un elemento de la coleccion especificada: insertar(insert), eliminar(delete) o actualizar(update).
 
     const storage = new local2json('mydatabase');
-    DB.trigger('user','update',obj=>{
+    DB.Trigger('user','update',obj=>{
         console.log('Se actualizo un usuario 🔄');
     });
 
@@ -142,35 +143,35 @@ permite ejecutar una funcion despues que se realice un cambio en un elemento de 
 
     const  DB  =  new  local2json('farm');
     
-    // crear tabla si esta no existe
-    if(!DB.existTable('animal')){
-        DB.createTable('animal');
+    // crear coleccion si esta no existe
+    if(!DB.ThisCollectionExist('animal')){
+        DB.CreateCollection('animal');
     }
     
       
     
-    DB.insert('animal',{name:'dog',color:'black'});
-    DB.insert('animal',{name:'cat',color:'white'});
-    DB.insert('animal',{name:'dog',color:'brown'});
+    DB.Insert('animal',{name:'dog',color:'black'});
+    DB.Insert('animal',{name:'cat',color:'white'});
+    DB.Insert('animal',{name:'dog',color:'brown'});
     
       
     
-    const  blackAnimals  =  DB.get('animal','color == black');
+    const  blackAnimals  =  DB.Get('animal','color == black');
     
     
 
 ## ejemplo completo 2
     const DB = new local2json('shop');
     
-    DB.createTable('client');
+    DB.CreateCollection('client');
     
       
     
-    DB.insert('client',{name:'Jose López',sex:'M',age:23});
-    DB.insert('client',{name:'Tamara Gonzales',sex:'F',age:37});
-    DB.insert('client',{name:'Hilda Bayres',sex:'F',age:21});
+    DB.Insert('client',{name:'Jose López',sex:'M',age:23});
+    DB.Insert('client',{name:'Tamara Gonzales',sex:'F',age:37});
+    DB.Insert('client',{name:'Hilda Bayres',sex:'F',age:21});
     
       
     // obtendra una lista de todos los clientes que contengan la palabra Bayres
-    const lastName = DB.get('client','name %% Bayres');
+    const lastName = DB.Get('client','name %% Bayres');
     console.log(lastName);
