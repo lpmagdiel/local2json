@@ -177,7 +177,7 @@ class local2json{
      */
     Get(Collection,searchParameter){
         const SelectedCollection = this.GetCollection(Collection);
-        const CountCollection = this.SelectedCollection.length;
+        const CountCollection = SelectedCollection.items.length;
         let result           = [];
         const val1           = searchParameter.split(' ',10)[0];
         const val2           = searchParameter.split(' ',10)[2];
@@ -205,7 +205,7 @@ class local2json{
      */
     Delete(Collection,searchParameter){
         const SelectedCollection = this.GetCollection(Collection);
-        const CountCollection = this.SelectedCollection.length;
+        const CountCollection = SelectedCollection.items.length;
         let result           = false;
         const val1           = searchParameter.split(' ',10)[0];
         const val2           = searchParameter.split(' ',10)[2];
@@ -240,7 +240,7 @@ class local2json{
      */
     Update(Collection,searchParameter,newValue){
         const SelectedCollection = this.GetCollection(Collection);
-        const CountCollection = this.SelectedCollection.length;
+        const CountCollection = SelectedCollection.items.length;
         let result           = false;
         const val1           = searchParameter.split(' ',10)[0];
         const val2           = searchParameter.split(' ',10)[2];
