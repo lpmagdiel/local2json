@@ -1,6 +1,6 @@
 class local2json{
     /*  create By: Magdiel López Morales <lpmagdiel>
-        versión: 1.2.0
+        versión: 1.2.1
     */
 
    /**
@@ -16,6 +16,19 @@ class local2json{
             this.collections = JSON.parse(localStorage.getItem(name));
         }
     }
+    /**
+     * Genera una cantidad aleatoria de caracteres
+     * @param {number} MaxCharts - Cantidad maxima de caracteres a generar por defecto 30
+     * @returns {string}
+     */
+    Id(MaxCharts=30){
+        const letters = Array.from('abcdefghijklmnopqrstuvwxyz0123456789');
+        let out = '';
+        while (out.length <= MaxCharts){
+            out += letters[Math.floor(Math.random() * 36)] ;
+        }
+        return out;
+    }
     // collections control functions
     Save(){
         localStorage.setItem(this.name,JSON.stringify(this.collections));
@@ -25,12 +38,12 @@ class local2json{
      * @param {string} Collection - Nombre de la coleccion
      * @returns {boolean}
      */
-    CreateCollection(Collection){
+    CreateCollection(Collection,generateId=false){
         const CountCollection = this.collections.length;
         for (let i=0;i<CountCollection;i++){
             if(this.collections[i].name == Collection) return false;
         }
-        this.collections.push({name:Collection,data:[],index:this.collections.length});
+        this.collections.push({name:Collection,data:[],index:this.collections.length,generateId});
         this.Save();
         return true;
     }
@@ -80,6 +93,11 @@ class local2json{
         const CountCollection = this.collections.length;
         for (let i=0;i < CountCollection;i++) {
             if (this.collections[i].name == Collection) {
+                if(this.collections[i].generateId){
+                    for(let x=0;x<data.length;x++){
+                        data[x].ID = (data[x].ID != undefined)? data[x].ID : this.Id();
+                    }
+                }
                 this.collections[i].data = data;
                 this.Save();
                 return true;
@@ -115,6 +133,7 @@ class local2json{
         const CountCollection = this.collections.length;
         for (let i=0;i < CountCollection;i++) {
             if (this.collections[i].name == Collection) {
+                if(this.collections[i].generateId) item.ID = this.Id();
                 this.collections[i].data.push(item);
                 this.Save();
                 for(let t in this.triggers){
@@ -252,6 +271,9 @@ class local2json{
                 if(parameters[x].split(':')[0] == val1){
                     const value = parameters[x].split(':')[1];
                     if(this.IsValidQuestion(question,val2,value)){
+                        if(this.collections[SelectedCollection.index].generateId){
+                            newValue.ID = this.collections[SelectedCollection.index].data[i].ID;
+                        }
                         this.collections[SelectedCollection.index].data[i] = newValue;
                         this.Save();
                         for(let t in this.triggers){
@@ -275,5 +297,13 @@ class local2json{
      */
     Trigger(Collection,event,fx){
         this.triggers.push({table:Collection,event:event,fun:fx});
+    }
+    /**
+     * Elimina todos los datos inclullendo las colecciones
+     */
+    Clear(){
+        localStorage.clear();
+        this.collections = [];
+        this.triggers = [];
     }
 }

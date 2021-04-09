@@ -12,7 +12,7 @@
         var lista = document.getElementById('lista');
         var DB = new local2json('tienda');
         if(!DB.ThisCollectionExist('cliente')){
-            DB.CreateCollection('cliente');
+            DB.CreateCollection('cliente',true);
             DB.Insert('cliente',{name:'Juan',sexo:'hombre'});
             DB.Insert('cliente',{name:'Maria',sexo:'mujer'});
             DB.Insert('cliente',{name:'Fernando',sexo:'hombre'});
@@ -28,6 +28,7 @@
             let p = document.createElement('p');
             p.innerText = clientes[i].name;
             lista.append(p);
+            console.log(clientes[i]);
         }
     </script>
 </body>

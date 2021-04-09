@@ -2,11 +2,13 @@
 
 ## listado de funciones:
 
+ - Clear
  - CreateCollection
  - GetCollection
  - UpdateCollection
  - DeleteCollection
  - ThisCollectionExist
+ - Id
  - Insert
  - Get
  - Delete
@@ -42,8 +44,14 @@ código javascript
 |diferente que| !=|
 |contiene | %% |
 
+### Clear
+elimina completamente los datos incluyento las colecciones
+
+    const storage = new local2json('mydatabase');
+    storage.Clear();
+
 ### CreateCollection
-crea fácilmente una nueva coleccion
+crea fácilmente una nueva coleccion, primer parametro (obligatorio) nombre de la coleccion, 2do parametro (opcional, booleano) generar in ID automatico
 
     const storage = new local2json('mydatabase');
     storage.CreateCollection('user');
@@ -106,6 +114,11 @@ inserta un nuevo objeto en la coleccion especificada
     }
     storage.Insert('user',person);
 
+### Id
+genera un string con caracteres aleatorios, parametro opcional: cantidad minima de caracteres a generar
+
+    const storage = new local2json('mydatabase');
+    const newId = storage.Id(15); // genera un ID con 15 caracteres
 
 ### Get
 obtiene los elementos que encajen con los parámetros de búsqueda
