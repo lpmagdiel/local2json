@@ -11,6 +11,7 @@
  - Id
  - Insert
  - Get
+ - GetById
  - Delete
  - Update
  - Trigger
@@ -127,6 +128,10 @@ obtiene los elementos que encajen con los parámetros de búsqueda
     const parameter = 'name == mark';
     const items = storage.Get('user',parameter);
     
+### GetById
+    const storage = new local2json('mydatabase');
+    const user = storage.GetById('user','abcd12345');
+
 ### Delete
 elimina los elementos que encajen con los parámetros de búsqueda
 

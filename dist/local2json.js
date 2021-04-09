@@ -1,6 +1,6 @@
 class local2json{
     /*  create By: Magdiel López Morales <lpmagdiel>
-        versión: 1.2.1
+        versión: 1.2.2
     */
 
    /**
@@ -214,6 +214,23 @@ class local2json{
                 }
             }
         }
+        return result;
+    }
+    /**
+     * 
+     * @param {String} Collection 
+     * @param {String} ID 
+     * @returns {Object}
+     */
+    GetById(Collection,ID){
+        const collection = this.GetCollection(Collection);
+        let result = {};
+        collection.items.forEach(i=>{
+            if(i.ID == ID){
+                result = i;
+                return result;
+            }
+        });
         return result;
     }
     /**
