@@ -1,4 +1,4 @@
-# local2json v1.2.0
+# local2json v1.3.0
 
 ## listado de funciones:
 
@@ -7,6 +7,7 @@
  - GetCollection
  - UpdateCollection
  - DeleteCollection
+ - CollectionItems
  - ThisCollectionExist
  - Id
  - Insert

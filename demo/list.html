@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple list</title>
+    <style>
+        li{
+            display: flex;
+            justify-content: space-between;
+            background-color: #f0f0f0;
+            padding: 5px;
+            border-radius: 4px;
+            margin: 10px;
+        }
+        button{
+            background-color: rgb(226, 32, 32);
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 4px;
+            min-width:65px;
+            min-height: 26px;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" placeholder="Task" id="in-task">
+    <button id="btn-add">Add Task</button>
+    <br>
+    <ul id="tasklist">
+
+    </ul>
+    <script src="../dist/local2json.min.js"></script>
+    <script>
+        const DB = new local2json('tasks');
+        const list = document.getElementById('tasklist');
+        const add = document.getElementById('btn-add');
+        const inputTask = document.getElementById('in-task');
+
+        add.addEventListener('click', e =>{
+            if(inputTask.value.length <1) return;
+            const id = DB.Id(7);
+            const taskName = inputTask.value;
+            DB.Insert('task',{id,taskName});
+            list.innerHTML += createTask(taskName,id);
+        });
+
+        function createTask(task,id){
+            return `<li id="${id}"><p>${task}</p><button onclick="deleteTask('${id}')">Delete</button></li>`;
+        }
+        function deleteTask(id){
+            document.getElementById(id).style.display = 'none';
+            DB.Delete('task','id == '+id);
+        }
+
+        window.addEventListener('load', e =>{
+            if(!DB.ThisCollectionExist('task')){
+                DB.CreateCollection('task');
+            }
+            else{
+                const allTask = DB.GetCollection('task');
+                allTask.map(t =>{
+                    list.innerHTML += createTask(t.taskName,t.id);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

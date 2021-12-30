@@ -1,6 +1,6 @@
 class local2json{
     /*  create By: Magdiel López Morales <lpmagdiel>
-        versión: 1.2.2
+        versión: 1.3.0
     */
 
    /**
@@ -30,7 +30,8 @@ class local2json{
         return out;
     }
     // collections control functions
-    Save(){
+    // private save data in localstorage
+    #Save(){
         localStorage.setItem(this.name,JSON.stringify(this.collections));
     }
     /**
@@ -39,12 +40,9 @@ class local2json{
      * @returns {boolean}
      */
     CreateCollection(Collection,generateId=false){
-        const CountCollection = this.collections.length;
-        for (let i=0;i<CountCollection;i++){
-            if(this.collections[i].name == Collection) return false;
-        }
-        this.collections.push({name:Collection,data:[],index:this.collections.length,generateId});
-        this.Save();
+        if(this.ThisCollectionExist(Collection)) return false;
+        this.collections.push({name:Collection,data:[],generateId});
+        this.#Save();
         return true;
     }
     /**
@@ -53,19 +51,18 @@ class local2json{
      * @returns {array} - Array de objetos dentro de esa coleccion
      */
     GetCollection(Collection){
-        let CollectionOut ={
-            items:[],
-            index:0
-        };
-        const CountCollection = this.collections.length;
-        for (let i=0;i<CountCollection;i++) {
-            if (this.collections[i].name == Collection) {
-                CollectionOut.items = this.collections[i].data;
-                CollectionOut.index = i;
-                break;
-            }
+        return this.collections.filter(c=>c.name == Collection)[0].data;
+    }
+    #GetCollectionIndex(Collection){
+        const data = this.collections.entries();
+        let index = -1;
+        for(const [key,value] of data){
+            if(value.name==Collection) index=key;
         }
-        return CollectionOut;
+        return index;
+    }
+    CollectionItems(Collection){
+        return this.GetCollection(Collection).length;
     }
     /**
      * 
@@ -73,15 +70,7 @@ class local2json{
      * @returns {boolean}
      */
     ThisCollectionExist(Collection){
-        let out = false;
-        const CountCollection = this.collections.length;
-        for (let i=0;i<CountCollection;i++) {
-            if (this.collections[i].name == Collection) {
-                out = true;
-                break;
-            }
-        }
-        return out;
+        return this.collections.filter(c => c.name == Collection).length > 0;
     }
     /**
      * 
@@ -90,20 +79,16 @@ class local2json{
      * @returns {boolean}
      */
     UpdateCollection(Collection,data=[]){
-        const CountCollection = this.collections.length;
-        for (let i=0;i < CountCollection;i++) {
-            if (this.collections[i].name == Collection) {
-                if(this.collections[i].generateId){
-                    for(let x=0;x<data.length;x++){
-                        data[x].ID = (data[x].ID != undefined)? data[x].ID : this.Id();
-                    }
-                }
-                this.collections[i].data = data;
-                this.Save();
-                return true;
-            }
+        if(!this.ThisCollectionExist(Collection)){
+            return false;
         }
-        return false;
+        const i = this.#GetCollectionIndex(Collection);
+        if(this.collections[i].generateId){
+            data = data.map(x => (x.ID != undefined)? x.ID : this.Id());
+        }
+        this.collections[i].data = data;
+        this.#Save();
+        return true;
     }
     /**
      * 
@@ -111,15 +96,13 @@ class local2json{
      * @returns {boolean}
      */
     DeleteCollection(Collection){
-        const CountCollection = this.collections.length;
-        for (let i=0;i < CountCollection;i++) {
-            if (this.collections[i].name == Collection) {
-                this.collections.splice(i, 1);
-                this.Save();
-                return true;
-            }
+        if(!this.ThisCollectionExist(Collection)){
+            return false;
         }
-        return false;
+        const i = this.#GetCollectionIndex(Collection);
+        this.collections.splice(i, 1);
+        this.#Save();
+        return true;
     }
     // data control functions
 
@@ -130,23 +113,19 @@ class local2json{
      * @returns {boolean}
      */
     Insert(Collection,item){
-        const CountCollection = this.collections.length;
-        for (let i=0;i < CountCollection;i++) {
-            if (this.collections[i].name == Collection) {
-                if(this.collections[i].generateId) item.ID = this.Id();
-                this.collections[i].data.push(item);
-                this.Save();
-                for(let t in this.triggers){
-                    if(this.triggers[t].table == Collection && this.triggers[t].event == 'insert'){
-                        this.triggers[t].fun();
-                    }
-                }
-                return true;
+        if(!this.ThisCollectionExist(Collection)) return false;
+        const i = this.#GetCollectionIndex(Collection);
+        if(this.collections[i].generateId) item.ID = this.Id();
+        this.collections[i].data.push(item);
+        this.#Save();
+        for(let t in this.triggers){
+            if(this.triggers[t].table == Collection && this.triggers[t].event == 'insert'){
+                this.triggers[t].fun();
             }
         }
-        return false;
+        return true;
     }
-    ClearObject(obj){
+    #ClearObject(obj){
         let obj_str = JSON.stringify(obj);
         let out = "";
         obj_str = obj_str.replace('{', '');
@@ -158,34 +137,17 @@ class local2json{
         });
         return out;
     }
-    IsValidQuestion(question,val1,val2){
+    #IsValidQuestion(question,val1,val2){
+        const q = question;
         let valid = false;
-        switch(question){
-            case '==':
-                valid = (val1 == val2);
-                break;
-            case '===':
-                valid = (val1 === val2);
-                break;
-            case '<':
-                valid = (val1 < val2);
-                break;
-            case '<=':
-                valid = (val1 <= val2);
-                break;
-            case '>':
-                valid = (val1 > val2);
-                break;
-            case '>=':
-                valid = (val1 >= val2);
-                break;
-            case '!=':
-                valid = (val1 != val2);
-                break;
-            case '%%':
-                valid = (val2.indexOf(val1) > -1);
-                break;
-        }
+        if(q=='==') valid = (val1 == val2);
+        else if(q=='===') valid = (val1 === val2);
+        else if(q=='<') valid = (val1 < val2);
+        else if(q=='<=') valid = (val1 <= val2);
+        else if(q=='>') valid = (val1 > val2);
+        else if(q=='<=') valid = (val1 >= val2);
+        else if(q=='!=') valid = (val1 != val2);
+        else if(q=='%%') valid = (val2.indexOf(val1) > -1);
         return valid;
     }
     /**
@@ -196,19 +158,19 @@ class local2json{
      */
     Get(Collection,searchParameter){
         const SelectedCollection = this.GetCollection(Collection);
-        const CountCollection = SelectedCollection.items.length;
+        const CountCollection = SelectedCollection.length;
         let result           = [];
         const val1           = searchParameter.split(' ',10)[0];
         const val2           = searchParameter.split(' ',10)[2];
         const question       = searchParameter.split(' ',10)[1];
         for(let i=0;i<CountCollection;i++){
-            const CollectionString = this.ClearObject(SelectedCollection.items[i]);
+            const CollectionString = this.#ClearObject(SelectedCollection[i]);
             const parameters  = CollectionString.split(',',500);
             for(let x=0;x<parameters.length;x++){
                 if(parameters[x].split(':')[0] == val1){
                     const value = parameters[x].split(':')[1];
-                    if(this.IsValidQuestion(question,val2,value)){
-                        result.push(SelectedCollection.items[i]);
+                    if(this.#IsValidQuestion(question,val2,value)){
+                        result.push(SelectedCollection[i]);
                         x = parameters.length;
                     }
                 }
@@ -224,14 +186,7 @@ class local2json{
      */
     GetById(Collection,ID){
         const collection = this.GetCollection(Collection);
-        let result = {};
-        collection.items.forEach(i=>{
-            if(i.ID == ID){
-                result = i;
-                return result;
-            }
-        });
-        return result;
+        return collection.filter(i => i.ID == ID)[0];
     }
     /**
      * 
@@ -240,32 +195,22 @@ class local2json{
      * @returns {boolean}
      */
     Delete(Collection,searchParameter){
-        const SelectedCollection = this.GetCollection(Collection);
-        const CountCollection = SelectedCollection.items.length;
-        let result           = false;
+        const i = this.#GetCollectionIndex(Collection);
+        if(i < 0) return false;
         const val1           = searchParameter.split(' ',10)[0];
         const val2           = searchParameter.split(' ',10)[2];
         const question       = searchParameter.split(' ',10)[1];
-        for(let i=0;i<CountCollection;i++){
-            const CollectionString = this.ClearObject(SelectedCollection.items[i]);
-            const parameters  = CollectionString.split(',',500);
-            for(let x=0;x<parameters.length;x++){
-                if(parameters[x].split(':')[0] == val1){
-                    const value = parameters[x].split(':')[1];
-                    if(this.IsValidQuestion(question,val2,value)){
-                        this.collections[SelectedCollection.index].data.splice(SelectedCollection[i],1);
-                        this.Save();
-                        for(let t in this.triggers){
-                            if(this.triggers[t].table == Collection && this.triggers[t].event == 'delete'){
-                                this.triggers[t].fun();
-                            }
-                        }
-                        return true;
-                    }
-                }
+        const newCollectionData = this.collections[i].data.filter(item => {
+            return !(this.#IsValidQuestion(question,val2,item[val1]));
+        });
+        this.collections[i].data = newCollectionData;
+        this.#Save();
+        for(let t in this.triggers){
+            if(this.triggers[t].table == Collection && this.triggers[t].event == 'delete'){
+                this.triggers[t].fun();
             }
         }
-        return result;
+        return true;
     }
     /**
      * 
@@ -275,35 +220,26 @@ class local2json{
      * @returns {boolean}
      */
     Update(Collection,searchParameter,newValue){
-        const SelectedCollection = this.GetCollection(Collection);
-        const CountCollection = SelectedCollection.items.length;
-        let result           = false;
+        const i = this.#GetCollectionIndex(Collection);
+        if(i< 0) return false;
         const val1           = searchParameter.split(' ',10)[0];
         const val2           = searchParameter.split(' ',10)[2];
         const question       = searchParameter.split(' ',10)[1];
-        for(let i=0;i<CountCollection;i++){
-            const CollectionString = this.ClearObject(SelectedCollection.items[i]);
-            const parameters  = CollectionString.split(',',500);
-            for(let x=0;x<parameters.length;x++){
-                if(parameters[x].split(':')[0] == val1){
-                    const value = parameters[x].split(':')[1];
-                    if(this.IsValidQuestion(question,val2,value)){
-                        if(this.collections[SelectedCollection.index].generateId){
-                            newValue.ID = this.collections[SelectedCollection.index].data[i].ID;
-                        }
-                        this.collections[SelectedCollection.index].data[i] = newValue;
-                        this.Save();
-                        for(let t in this.triggers){
-                            if(this.triggers[t].table == Collection && this.triggers[t].event == 'update'){
-                                this.triggers[t].fun();
-                            }
-                        }
-                        return true;
-                    }
-                }
+        const newCollectionData = this.collections[i].data.map(item =>{
+            let out = item;
+            if((this.#IsValidQuestion(question,val2,item[val1]))){
+                out = newValue;
+            }
+            return out;
+        });
+        this.collections[i].data = newCollectionData;
+        this.#Save();
+        for(let t in this.triggers){
+            if(this.triggers[t].table == Collection && this.triggers[t].event == 'update'){
+                this.triggers[t].fun();
             }
         }
-        return result;
+        return true;
     }
     
     /**
