@@ -1,6 +1,6 @@
 class local2json{
     /*  create By: Magdiel López Morales <lpmagdiel>
-        versión: 1.3.0
+        versión: 1.5.0
     */
 
    /**
@@ -51,6 +51,7 @@ class local2json{
      * @returns {array} - Array de objetos dentro de esa coleccion
      */
     GetCollection(Collection){
+        if(!this.ThisCollectionExist(Collection)) return [];
         return this.collections.filter(c=>c.name == Collection)[0].data;
     }
     #GetCollectionIndex(Collection){
@@ -126,16 +127,7 @@ class local2json{
         return true;
     }
     #ClearObject(obj){
-        let obj_str = JSON.stringify(obj);
-        let out = "";
-        obj_str = obj_str.replace('{', '');
-        obj_str = obj_str.replace('}', '');
-        Array.from(obj_str).map(t=>{
-            if(t!='"' && t!='\\'){
-                out += t;
-            }
-        });
-        return out;
+        return Object.entries(obj);
     }
     #IsValidQuestion(question,val1,val2){
         const q = question;
@@ -164,11 +156,10 @@ class local2json{
         const val2           = searchParameter.split(' ',10)[2];
         const question       = searchParameter.split(' ',10)[1];
         for(let i=0;i<CountCollection;i++){
-            const CollectionString = this.#ClearObject(SelectedCollection[i]);
-            const parameters  = CollectionString.split(',',500);
+            const parameters  = this.#ClearObject(SelectedCollection[i])
             for(let x=0;x<parameters.length;x++){
-                if(parameters[x].split(':')[0] == val1){
-                    const value = parameters[x].split(':')[1];
+                if(parameters[x][0] == val1){
+                    const value = parameters[x][1];
                     if(this.#IsValidQuestion(question,val2,value)){
                         result.push(SelectedCollection[i]);
                         x = parameters.length;

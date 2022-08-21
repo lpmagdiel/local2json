@@ -55,10 +55,11 @@
 
         // cargar tarjetas
         const savedCards = DB.GetCollection('card');
-        for(let i=0;i<savedCards.items.length;i++){
-            const idCard = savedCards.items[i].id;
-            const titleCard = savedCards.items[i].title;
-            const descriptionCard = savedCards.items[i].description;
+        console.log( savedCards );
+        for(let i=0;i<savedCards.length;i++){
+            const idCard = savedCards[i].id;
+            const titleCard = savedCards[i].title;
+            const descriptionCard = savedCards[i].description;
             createCard(idCard,titleCard,descriptionCard);
         }
     </script>
