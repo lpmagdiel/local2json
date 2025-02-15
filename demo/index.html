@@ -10,7 +10,7 @@
     <script src="../dist/local2json.js"></script>
     <script>
         var lista = document.getElementById('lista');
-        var DB = new local2json('tienda');
+        var DB = new Local2Json('tienda');
         var clientes = DB.GetCollection('cliente');
         if(clientes.length < 1){
             DB.CreateCollection('cliente');
@@ -20,7 +20,7 @@
         }
         DB.Delete('cliente','name == Juan');
         DB.Update('cliente','name == Fernando',{name:'Fernanda',sexo:'mujer'});
-        clientes = DB.Get('cliente','sexo == mujer');
+        clientes = DB.Query('cliente',{sexo:'mujer'});
         for(let i=0;i<clientes.length;i++){
             let p = document.createElement('p');
             p.innerText = clientes[i].name;
