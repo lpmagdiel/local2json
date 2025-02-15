@@ -1,253 +1,193 @@
-class local2json{
+class Local2Json {
     /*  create By: Magdiel López Morales <lpmagdiel>
-        versión: 1.5.0
+        versión: 2.0.0 (Optimizado)
     */
 
-   /**
-    * Inicializar datos
-    * @constructor
-    * @param {string} name - Nombre de la base de datos
-    */
-    constructor(name){
-        this.name           = name;
-        this.collections    = [];
-        this.triggers       = [];
-        if(localStorage.getItem(name)){
-            this.collections = JSON.parse(localStorage.getItem(name));
-        }
-    }
-    /**
-     * Genera una cantidad aleatoria de caracteres
-     * @param {number} MaxCharts - Cantidad maxima de caracteres a generar por defecto 30
-     * @returns {string}
-     */
-    Id(MaxCharts=30){
-        const letters = Array.from('abcdefghijklmnopqrstuvwxyz0123456789');
-        let out = '';
-        while (out.length <= MaxCharts){
-            out += letters[Math.floor(Math.random() * 36)] ;
-        }
-        return out;
-    }
-    // collections control functions
-    // private save data in localstorage
-    #Save(){
-        localStorage.setItem(this.name,JSON.stringify(this.collections));
-    }
-    /**
-     * Crear una nueva coleccion de datos
-     * @param {string} Collection - Nombre de la coleccion
-     * @returns {boolean}
-     */
-    CreateCollection(Collection,generateId=false){
-        if(this.ThisCollectionExist(Collection)) return false;
-        this.collections.push({name:Collection,data:[],generateId});
-        this.#Save();
-        return true;
-    }
-    /**
-     * 
-     * @param {string} Collection - Nombre de la coleccion que se desea obtener
-     * @returns {array} - Array de objetos dentro de esa coleccion
-     */
-    GetCollection(Collection){
-        if(!this.ThisCollectionExist(Collection)) return [];
-        return this.collections.filter(c=>c.name == Collection)[0].data;
-    }
-    #GetCollectionIndex(Collection){
-        const data = this.collections.entries();
-        let index = -1;
-        for(const [key,value] of data){
-            if(value.name==Collection) index=key;
-        }
-        return index;
-    }
-    CollectionItems(Collection){
-        return this.GetCollection(Collection).length;
-    }
-    /**
-     * 
-     * @param {string} Collection - Nombre de la coleccion que se consultar
-     * @returns {boolean}
-     */
-    ThisCollectionExist(Collection){
-        return this.collections.filter(c => c.name == Collection).length > 0;
-    }
-    /**
-     * 
-     * @param {string} Collection - Nombre de la coleccion que se consultar
-     * @param {array} data - Nuevo array de objetos
-     * @returns {boolean}
-     */
-    UpdateCollection(Collection,data=[]){
-        if(!this.ThisCollectionExist(Collection)){
-            return false;
-        }
-        const i = this.#GetCollectionIndex(Collection);
-        if(this.collections[i].generateId){
-            data = data.map(x => (x.ID != undefined)? x.ID : this.Id());
-        }
-        this.collections[i].data = data;
-        this.#Save();
-        return true;
-    }
-    /**
-     * 
-     * @param {string} Collection - Nombre de la coleccion que se desea eliminar
-     * @returns {boolean}
-     */
-    DeleteCollection(Collection){
-        if(!this.ThisCollectionExist(Collection)){
-            return false;
-        }
-        const i = this.#GetCollectionIndex(Collection);
-        this.collections.splice(i, 1);
-        this.#Save();
-        return true;
-    }
-    // data control functions
+    #operators = {
+        '==': (a, b) => a == b,
+        '===': (a, b) => a === b,
+        '<': (a, b) => a < b,
+        '<=': (a, b) => a <= b,
+        '>': (a, b) => a > b,
+        '>=': (a, b) => a >= b,
+        '!=': (a, b) => a != b,
+        '%%': (a, b) => b.includes(a),
+        '$gt': (a, b) => a > b,
+        '$lt': (a, b) => a < b,
+        '$in': (a, b) => b.includes(a)
+    };
 
-    /**
-     * 
-     * @param {string} Collection - Nombre de la coleccion a ingresar nuevo registro
-     * @param {object} item - Nuevo registro
-     * @returns {boolean}
-     */
-    Insert(Collection,item){
-        if(!this.ThisCollectionExist(Collection)) return false;
-        const i = this.#GetCollectionIndex(Collection);
-        if(this.collections[i].generateId) item.ID = this.Id();
-        this.collections[i].data.push(item);
-        this.#Save();
-        for(let t in this.triggers){
-            if(this.triggers[t].table == Collection && this.triggers[t].event == 'insert'){
-                this.triggers[t].fun();
+    constructor(name) {
+        this.name = name;
+        this.collections = new Set();
+        this.triggers = {};
+        this.indexes = new Map();
+        this.#loadCollections();
+    }
+
+    #loadCollections() {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(`${this.name}_`)) {
+                const collectionName = key.split('_')[1];
+                this.collections.add(collectionName);
             }
         }
+    }
+
+    Id(MaxCharts = 24) {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        return Array.from(crypto.getRandomValues(new Uint8Array(MaxCharts)))
+            .map(byte => chars[byte % chars.length])
+            .join('');
+    }
+
+    #SaveCollection(collection) {
+        const data = this.GetCollection(collection);
+        localStorage.setItem(
+            `${this.name}_${collection}`,
+            JSON.stringify(data, null, 0)
+        );
+    }
+
+    CreateCollection(collection, options = { index: [] }) {
+        if (this.collections.has(collection)) return false;
+        
+        this.collections.add(collection);
+        this.#SaveCollection(collection);
+        
+        options.index.forEach(field => 
+            this.#createIndex(collection, field)
+        );
+        
         return true;
     }
-    #ClearObject(obj){
-        return Object.entries(obj);
+
+    #createIndex(collection, field) {
+        if (!this.indexes.has(collection)) {
+            this.indexes.set(collection, new Map());
+        }
+        
+        const index = this.indexes.get(collection);
+        index.set(field, new Map());
+        
+        this.GetCollection(collection).forEach(item => {
+            const value = item[field];
+            if (value !== undefined) {
+                if (!index.get(field).has(value)) {
+                    index.get(field).set(value, new Set());
+                }
+                index.get(field).get(value).add(item.ID);
+            }
+        });
     }
-    #IsValidQuestion(question,val1,val2){
-        const q = question;
-        let valid = false;
-        if(q=='==') valid = (val1 == val2);
-        else if(q=='===') valid = (val1 === val2);
-        else if(q=='<') valid = (val1 < val2);
-        else if(q=='<=') valid = (val1 <= val2);
-        else if(q=='>') valid = (val1 > val2);
-        else if(q=='<=') valid = (val1 >= val2);
-        else if(q=='!=') valid = (val1 != val2);
-        else if(q=='%%') valid = (val2.indexOf(val1) > -1);
-        return valid;
+
+    GetCollection(collection) {
+        return JSON.parse(localStorage.getItem(`${this.name}_${collection}`)) || [];
     }
-    /**
-     * 
-     * @param {string} Collection - Nombre de la coleccion que se consultar
-     * @param {string} searchParameter - consulta para buscar dentro de las colecciones
-     * @returns {array}
-     */
-    Get(Collection,searchParameter){
-        const SelectedCollection = this.GetCollection(Collection);
-        const CountCollection = SelectedCollection.length;
-        let result           = [];
-        const val1           = searchParameter.split(' ',10)[0];
-        const val2           = searchParameter.split(' ',10)[2];
-        const question       = searchParameter.split(' ',10)[1];
-        for(let i=0;i<CountCollection;i++){
-            const parameters  = this.#ClearObject(SelectedCollection[i])
-            for(let x=0;x<parameters.length;x++){
-                if(parameters[x][0] == val1){
-                    const value = parameters[x][1];
-                    if(this.#IsValidQuestion(question,val2,value)){
-                        result.push(SelectedCollection[i]);
-                        x = parameters.length;
+
+    Insert(collection, item) {
+        if (!this.collections.has(collection)) return false;
+
+        const data = this.GetCollection(collection);
+        item.ID = this.Id();
+        data.push(item);
+        
+        this.#updateIndexes(collection, item, 'add');
+        localStorage.setItem(`${this.name}_${collection}`, JSON.stringify(data, null, 0));
+        
+        this.#fireTrigger(collection, 'insert');
+        return item.ID;
+    }
+
+    #updateIndexes(collection, item, operation) {
+        if (!this.indexes.has(collection)) return;
+
+        const indexes = this.indexes.get(collection);
+        indexes.forEach((indexMap, field) => {
+            const value = item[field];
+            if (value !== undefined) {
+                if (operation === 'add') {
+                    if (!indexMap.has(value)) {
+                        indexMap.set(value, new Set());
+                    }
+                    indexMap.get(value).add(item.ID);
+                } else {
+                    if (indexMap.has(value)) {
+                        indexMap.get(value).delete(item.ID);
                     }
                 }
             }
-        }
-        return result;
-    }
-    /**
-     * 
-     * @param {String} Collection 
-     * @param {String} ID 
-     * @returns {Object}
-     */
-    GetById(Collection,ID){
-        const collection = this.GetCollection(Collection);
-        return collection.filter(i => i.ID == ID)[0];
-    }
-    /**
-     * 
-     * @param {string} Collection - Nombre de la coleccion que se consultar
-     * @param {string} searchParameter - consulta para buscar y eliminar registro dentro de las colecciones
-     * @returns {boolean}
-     */
-    Delete(Collection,searchParameter){
-        const i = this.#GetCollectionIndex(Collection);
-        if(i < 0) return false;
-        const val1           = searchParameter.split(' ',10)[0];
-        const val2           = searchParameter.split(' ',10)[2];
-        const question       = searchParameter.split(' ',10)[1];
-        const newCollectionData = this.collections[i].data.filter(item => {
-            return !(this.#IsValidQuestion(question,val2,item[val1]));
         });
-        this.collections[i].data = newCollectionData;
-        this.#Save();
-        for(let t in this.triggers){
-            if(this.triggers[t].table == Collection && this.triggers[t].event == 'delete'){
-                this.triggers[t].fun();
-            }
-        }
-        return true;
     }
-    /**
-     * 
-     * @param {string} Collection - Nombre de la coleccion que se consultar
-     * @param {string} searchParameter - consulta para buscar y actualizar registro dentro de las colecciones
-     * @param {object} newValue - datos con los que reemplazar registro antiguo
-     * @returns {boolean}
-     */
-    Update(Collection,searchParameter,newValue){
-        const i = this.#GetCollectionIndex(Collection);
-        if(i< 0) return false;
-        const val1           = searchParameter.split(' ',10)[0];
-        const val2           = searchParameter.split(' ',10)[2];
-        const question       = searchParameter.split(' ',10)[1];
-        const newCollectionData = this.collections[i].data.map(item =>{
-            let out = item;
-            if((this.#IsValidQuestion(question,val2,item[val1]))){
-                out = newValue;
-            }
-            return out;
+
+    Query(collection, query = {}) {
+        const data = this.GetCollection(collection);
+        
+        return data.filter(item => {
+            return Object.entries(query).every(([field, condition]) => {
+                if (typeof condition === 'object') {
+                    return Object.entries(condition).every(([operator, value]) => 
+                        this.#operators[operator](item[field], value)
+                    );
+                }
+                return item[field] === condition;
+            });
         });
-        this.collections[i].data = newCollectionData;
-        this.#Save();
-        for(let t in this.triggers){
-            if(this.triggers[t].table == Collection && this.triggers[t].event == 'update'){
-                this.triggers[t].fun();
-            }
+    }
+
+    GetById(collection, id) {
+        return this.Query(collection, { ID: id })[0];
+    }
+
+    Update(collection, query, changes) {
+        const items = this.Query(collection, query);
+        const data = this.GetCollection(collection);
+        
+        items.forEach(item => {
+            Object.assign(item, changes);
+            this.#updateIndexes(collection, item, 'update');
+        });
+        
+        localStorage.setItem(`${this.name}_${collection}`, JSON.stringify(data, null, 0));
+        this.#fireTrigger(collection, 'update');
+        return items.length;
+    }
+
+    Delete(collection, query) {
+        const keepItems = this.GetCollection(collection).filter(item => {
+            return !Object.entries(query).every(([field, condition]) => {
+                if (typeof condition === 'object') {
+                    return Object.entries(condition).every(([operator, value]) => 
+                        this.#operators[operator](item[field], value)
+                    );
+                }
+                return item[field] === condition;
+            });
+        });
+        
+        localStorage.setItem(`${this.name}_${collection}`, JSON.stringify(keepItems, null, 0));
+        this.#fireTrigger(collection, 'delete');
+        return this.GetCollection(collection).length - keepItems.length;
+    }
+
+    #fireTrigger(collection, event) {
+        const key = `${collection}_${event}`;
+        if (this.triggers[key]) {
+            this.triggers[key]();
         }
-        return true;
     }
-    
-    /**
-     * 
-     * @param {string} Collection - Nombre de la coleccion que asignar disparador
-     * @param {string} event - nombre del evento a asignar
-     * @param {Function} fx - funcion a ejecutar
-     */
-    Trigger(Collection,event,fx){
-        this.triggers.push({table:Collection,event:event,fun:fx});
+
+    Trigger(collection, event, handler) {
+        this.triggers[`${collection}_${event}`] = handler;
     }
-    /**
-     * Elimina todos los datos inclullendo las colecciones
-     */
-    Clear(){
-        localStorage.clear();
-        this.collections = [];
-        this.triggers = [];
+
+    Clear() {
+        this.collections.forEach(collection => {
+            localStorage.removeItem(`${this.name}_${collection}`);
+        });
+        this.collections.clear();
+        this.indexes.clear();
+        this.triggers = {};
     }
 }
